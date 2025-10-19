@@ -5,6 +5,136 @@ All notable changes to AirGapAICoder will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-19
+
+### 🎉 Major Release - Containerization & AirAI CLI
+
+This release introduces two major features: **Podman containerization** for simplified deployment and **AirAI CLI** - a professional command-line tool for managing and interacting with AI coding assistants.
+
+### Added
+
+#### AirAI CLI - Professional Command-Line Tool
+- **New Python CLI application** built with Click and Rich
+- Beautiful terminal output with colored text, tables, and progress indicators
+- Cross-platform support (Windows, macOS, Linux)
+- Commands:
+  - `airai health` - Check Ollama server health
+  - `airai models list` - List available AI models
+  - `airai chat MODEL "prompt"` - Chat with AI models
+  - `airai ask MODEL "question"` - Quick questions (alias)
+  - `airai code edit FILE` - AI-assisted file editing (NEW)
+  - `airai code review PATH` - Code review with AI (NEW)
+  - `airai code fix FILE` - AI-guided bug fixes (NEW)
+  - `airai code test FILE` - Generate tests with AI (NEW)
+  - `airai server start/stop/status` - Server management
+  - `airai package prepare` - Air-gap packaging
+  - `airai container build/run` - Container operations
+- Installable via pip: `pip install -e .` or from wheel
+- Configuration management via YAML
+- Air-gap friendly packaging
+
+#### Podman Containerization
+- **Containerfile** with GPU support (nvidia/cuda base)
+- Single-command deployment for air-gap environments
+- Container scripts:
+  - `scripts/container/build.sh` - Build container image
+  - `scripts/container/run.sh` - Run with GPU passthrough
+  - `scripts/container/deploy-airgap.sh` - Export for offline deployment
+- GPU passthrough support (`--device nvidia.com/gpu=all`)
+- Model persistence via volumes
+- Built-in health checks
+- Air-gap export/import workflow
+
+#### Documentation
+- **Standalone Quickstart Guide** (docs/QUICKSTART.md)
+  - Step-by-step deployment instructions
+  - Three deployment methods: Traditional, Container, AirAI CLI
+  - Platform-specific examples
+  - Quick usage examples
+- **Container Deployment Guide** (docs/CONTAINER-DEPLOYMENT.md)
+- **AirAI CLI Documentation** (src/airai/README.md)
+- **AirAI + Cline Integration Guide** (docs/AIRAI-CLINE-INTEGRATION.md)
+- Updated README with references to new guides
+
+#### Project Infrastructure
+- `pyproject.toml` - Modern Python packaging
+- Professional project structure in `src/airai/`
+- Comprehensive API client for Ollama HTTP API
+- Cross-platform utilities and helpers
+
+### Changed
+
+#### Removed Hardware Branding
+- Removed all "OMEN 35L" references from documentation
+- Updated to generic "GPU-Accelerated Server" terminology
+- Applies to: README, CLAUDE.md, INSTALLATION.md, REQUIREMENTS.md
+
+#### Documentation Reorganization
+- README now references standalone QUICKSTART.md
+- Streamlined main README for better overview
+- Separated deployment methods for clarity
+- Enhanced navigation and discoverability
+
+### Technical Details
+
+**AirAI CLI Stack:**
+- Click 8.1.7 - CLI framework
+- Rich 13.7.0 - Terminal formatting
+- Requests 2.31.0 - HTTP client
+- PyYAML 6.0.1 - Configuration
+- Python 3.9+ required
+
+**Container Stack:**
+- Base: nvidia/cuda:12.2.0-runtime-ubuntu22.04
+- Ollama server with GPU acceleration
+- AirAI CLI pre-installed
+- Port 11434 exposed
+- Volume: /root/.ollama/models
+
+**File Changes:**
+- Added: `Containerfile`, `pyproject.toml`, `src/airai/` directory
+- Added: `scripts/container/` scripts
+- Added: `docs/QUICKSTART.md`, `docs/CONTAINER-DEPLOYMENT.md`
+- Updated: `VERSION`, `README.md`, `CLAUDE.md`, documentation files
+
+### Migration Notes
+
+**For Existing Users:**
+- Traditional installation still fully supported
+- No breaking changes to existing deployments
+- New features are additive
+
+**Try the New Features:**
+```bash
+# Install AirAI CLI
+pip install -e .
+
+# Try container deployment
+./scripts/container/build.sh
+./scripts/container/run.sh
+
+# Use AirAI CLI
+airai health
+airai models list
+airai chat qwen-32b-cline "Write a function"
+```
+
+### Known Limitations
+
+- Container GPU support requires nvidia-container-toolkit
+- Windows container deployment requires WSL2 or Docker Desktop
+- AirAI coding assistant features are MVP (file editing, review)
+- Some advanced features still in development
+
+### Next Steps (v1.2.0)
+
+- Enhanced AI coding assistant features
+- Web-based administration dashboard
+- Advanced monitoring and analytics
+- Multi-GPU support planning
+
+---
+
 ## [1.0.2] - 2025-10-19
 
 ### Added

@@ -4,10 +4,12 @@
 
 A complete solution for running powerful AI-assisted coding tools in secure, offline environments using open-source models and local GPU acceleration.
 
-![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%2011-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%20|%20Ubuntu%20|%20macOS-blue.svg)
 ![GPU](https://img.shields.io/badge/GPU-NVIDIA-green.svg)
+![Container](https://img.shields.io/badge/deployment-podman-purple.svg)
+![CLI](https://img.shields.io/badge/cli-airai-green.svg)
 
 ## 📋 Table of Contents
 
@@ -41,6 +43,9 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 - ✅ **GPU-Accelerated Inference** - High-performance local AI model execution
 - ✅ **Extended Context Windows** - 131k tokens for large codebase analysis
 - ✅ **Multi-User Support** - Network-accessible server for team collaboration
+- ✅ **AirAI CLI** - Professional Python CLI for AI-assisted coding (NEW v1.1.0)
+- ✅ **Container Deployment** - Podman/Docker with single-command setup (NEW v1.1.0)
+- ✅ **Code Assistance** - AI file editing, review, and test generation (NEW v1.1.0)
 - ✅ **Universal CLI Access** - Use from any terminal on any platform (no IDE required)
 - ✅ **Optional IDE Integration** - VS Code + Cline extension available
 - ✅ **Multiple Models** - Switch between coding and reasoning-focused models
@@ -55,166 +60,53 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 | **DeepSeek R1 32B** | 32 Billion | 24GB | 131k tokens | Complex reasoning, algorithms |
 | **Qwen 2.5 Coder 14B** | 14 Billion | 12GB | 131k tokens | Lightweight, faster responses |
 
-## 🚀 Quickstart Guide
+## 🚀 Quick Start
 
-### From Zero to AI Coding in 5 Steps
+**New to AirGapAICoder?** See the [Quick Start Guide](docs/QUICKSTART.md) for step-by-step instructions.
 
-**Prerequisites:** A server with NVIDIA GPU and one internet-connected computer for preparation.
+### Choose Your Deployment Method
 
-#### Step 1: Prepare Package (Internet-Connected System)
+**Traditional Installation** (Recommended)
+- Manual installation with full control
+- Tested on Windows, Ubuntu, macOS
+- See: [QUICKSTART.md](docs/QUICKSTART.md#method-1-traditional-installation)
+
+**Container Deployment** (NEW in v1.1.0)
+- Single-command Podman/Docker deployment
+- GPU passthrough support
+- Perfect for air-gap environments
+- See: [CONTAINER-DEPLOYMENT.md](docs/CONTAINER-DEPLOYMENT.md)
+
+**AirAI CLI** (NEW in v1.1.0)
+- Professional Python CLI tool
+- AI-assisted code editing and review
+- Simplified management commands
+- Cross-platform support
+- See: [AirAI README](src/airai/README.md)
+
+### Quick Example
 
 ```bash
-# Clone repository
+# Clone and prepare (internet-connected system)
 git clone https://github.com/fuzemobi/AirGapAICoder.git
-cd AirGapAICoder
-
-# Run preparation script (downloads Ollama + models)
-cd scripts/preparation
+cd AirGapAICoder/scripts/preparation
 ./pull-all.sh
 
-# For production models (47GB), first run:
-export PULL_PRODUCTION_MODELS=true
-./pull-all.sh
+# Transfer to air-gap server via USB
 
-# Package is created at ~/airgap-package
-```
-
-**Windows (PowerShell):**
-```powershell
-git clone https://github.com/fuzemobi/AirGapAICoder.git
-cd AirGapAICoder\scripts\preparation
-.\pull-all.ps1
-```
-
-#### Step 2: Transfer to Air-Gap Server
-
-```bash
-# Copy to USB drive
-cp -r ~/airgap-package /Volumes/USB/
-
-# On server, copy from USB
-cp -r /media/USB/airgap-package ~/
-```
-
-#### Step 3: Install on Server
-
-**Windows Server:**
-```powershell
-cd scripts\installation\server
-.\install-windows.ps1 C:\airgap-package
-```
-
-**Ubuntu Server:**
-```bash
+# Install on server
 cd scripts/installation/server
 sudo ./install-ubuntu.sh ~/airgap-package
-```
 
-**macOS (Testing):**
-```bash
-cd scripts/installation/server
-./install-macos.sh ~/airgap-package
-```
-
-#### Step 4: Verify Server
-
-```bash
-# Check server health
-curl http://localhost:11434/api/tags
-
-# Or from another machine on network
-curl http://SERVER_IP:11434/api/tags
-
-# List models
-ollama list
-```
-
-#### Step 5: Start Using AI!
-
-**From ANY Terminal:**
-
-```bash
-# Using CLI wrapper
-./scripts/cli/ollama-cli.sh run SERVER_IP:11434 qwen-32b-cline \
-  "Write a Python function to calculate prime numbers"
-
-# Using curl directly
-curl http://SERVER_IP:11434/api/generate -d '{
+# Start using AI from any terminal!
+curl http://localhost:11434/api/generate -d '{
   "model": "qwen-32b-cline",
-  "prompt": "Write a REST API endpoint in Python FastAPI",
+  "prompt": "Write a Python function",
   "stream": false
 }' | jq -r '.response'
-
-# Using PowerShell
-Invoke-RestMethod http://SERVER_IP:11434/api/generate -Method POST -Body '{
-  "model": "qwen-32b-cline",
-  "prompt": "Create a React component for user login",
-  "stream": false
-}' -ContentType "application/json" | Select -ExpandProperty response
 ```
 
-**From Python:**
-```python
-import requests
-
-response = requests.post('http://SERVER_IP:11434/api/generate', json={
-    'model': 'qwen-32b-cline',
-    'prompt': 'Write a Python function to validate email addresses',
-    'stream': False
-})
-print(response.json()['response'])
-```
-
-**Optional: VS Code + Cline**
-
-If you prefer a GUI:
-1. Install VS Code
-2. Install Cline extension from package
-3. Configure: Settings → Base URL: `http://SERVER_IP:11434`
-4. Start chatting in Cline sidebar
-
-### Quick Examples
-
-**Code Generation:**
-```bash
-# Generate a complete Python module
-./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
-  "Create a Python class for managing a shopping cart with add, remove, checkout methods"
-
-# Generate tests
-./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
-  "Write pytest tests for this function: $(cat mycode.py)"
-```
-
-**Code Review:**
-```bash
-# Review code for issues
-curl http://SERVER:11434/api/generate -d "{
-  \"model\": \"qwen-32b-cline\",
-  \"prompt\": \"Review this code for bugs and security issues: $(cat app.py)\",
-  \"stream\": false
-}" | jq -r '.response'
-```
-
-**Refactoring:**
-```bash
-# Improve code quality
-./scripts/cli/ollama-cli.sh run SERVER:11434 deepseek-r1-32b-cline \
-  "Refactor this code to use async/await and add error handling: $(cat sync_code.py)"
-```
-
-**Documentation:**
-```bash
-# Generate docstrings
-./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
-  "Add comprehensive docstrings to: $(cat module.py)" > documented_module.py
-```
-
-### That's It!
-
-You now have a fully functional, air-gapped AI coding assistant accessible from any terminal, any platform, anywhere on your network.
-
-**No cloud required. No subscriptions. No data leakage. Complete control.**
+**See the complete guide:** [docs/QUICKSTART.md](docs/QUICKSTART.md)
 
 ---
 
@@ -267,7 +159,11 @@ Comprehensive documentation is available in the `docs/` directory:
 
 ### Getting Started
 
-- **[CLI Usage Guide](docs/CLI-USAGE.md)** - Use from any terminal (recommended)
+- **[Quick Start Guide](docs/QUICKSTART.md)** - Get running in 5 steps
+- **[AirAI CLI Guide](src/airai/README.md)** - AI coding assistant CLI (NEW)
+- **[Container Deployment](docs/CONTAINER-DEPLOYMENT.md)** - Podman/Docker setup (NEW)
+- **[AirAI + Cline Integration](docs/AIRAI-CLINE-INTEGRATION.md)** - Hybrid workflow (NEW)
+- **[CLI Usage Guide](docs/CLI-USAGE.md)** - Use from any terminal
 - **[Client Usage Guide](docs/CLIENT-USAGE.md)** - VS Code + Cline setup (optional)
 - **[Server Setup Guide](docs/SERVER-SETUP.md)** - Complete deployment guide
 
@@ -281,6 +177,7 @@ Comprehensive documentation is available in the `docs/` directory:
 ### For Developers
 
 - **[CLAUDE.md](CLAUDE.md)** - Claude Code development guidance
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
 
 ### Quick Reference
 
@@ -322,7 +219,7 @@ Get-Process ollama | Format-List *   # Process details
 
 ```
 ┌─────────────────────────────────────────┐
-│  OMEN 35L Server (Windows 11)           │
+│  GPU-Accelerated Server (Windows 11)    │
 │  ┌────────────────────────────────┐     │
 │  │  Ollama Server :11434          │     │
 │  │  ├─ Qwen 2.5 Coder 32B         │     │
@@ -442,13 +339,14 @@ See [Operations Guide](docs/OPERATIONS.md) for complete troubleshooting.
 - ✅ Service monitoring and auto-restart
 - ✅ Comprehensive documentation
 
-### v1.1 - Containerization (Q1 2026)
-- 🔜 Podman-based deployment
-- 🔜 Pre-built container images
-- 🔜 Windows Server container support
-- 🔜 AMD Ryzen 7 optimization
-- 🔜 Simplified updates via containers
-- 🔜 Container orchestration scripts
+### v1.1 - Containerization & AirAI CLI (Released 2025-10-19) ✅
+- ✅ Podman-based deployment
+- ✅ AirAI professional Python CLI
+- ✅ AI-assisted code editing and review
+- ✅ Single-command container deployment
+- ✅ GPU passthrough support
+- ✅ Container build and deployment scripts
+- ✅ Comprehensive documentation updates
 
 ### v1.2 - Enhanced Management (Q2 2026)
 - 🔜 Web-based admin dashboard
@@ -524,17 +422,19 @@ This solution is designed for legal, defensive security purposes only. Users are
 
 ## 🎯 Project Status
 
-**Current Version:** 1.0.2
+**Current Version:** 1.1.0
 **Status:** Production Ready
 **Last Updated:** 2025-10-19
 
-### Recent Updates
+### Recent Updates (v1.1.0)
 
-- ✅ Universal CLI access from any terminal
-- ✅ Comprehensive quickstart guide
-- ✅ Multi-platform installation scripts
-- ✅ Service monitoring and auto-restart
-- ✅ Complete documentation suite
+- ✅ **AirAI CLI** - Professional Python CLI with AI coding assistance
+- ✅ **Container Deployment** - Podman/Docker with GPU support
+- ✅ **AI Code Editing** - File editing, review, and test generation
+- ✅ **Standalone Quickstart** - Dedicated deployment guide
+- ✅ **Integration Guide** - AirAI + Cline hybrid workflow
+- ✅ **Generic Hardware** - Removed all brand-specific references
+- ✅ **Complete Documentation** - Comprehensive guides for all features
 
 ### What's Working
 

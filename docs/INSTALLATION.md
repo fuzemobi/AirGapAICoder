@@ -30,7 +30,7 @@ Required for initial downloads and package preparation:
 
 ### 1.2 Target Server (Air-Gapped)
 
-The OMEN 35L server specifications:
+The target server specifications:
 
 - **OS**: Windows 11 Professional (fresh install recommended)
 - **GPU**: NVIDIA RTX 4090 or similar (24GB+ VRAM)

@@ -36,7 +36,7 @@ AirGapAICoder is an enterprise air-gapped AI coding assistant system that runs c
 
 ```
 ┌─────────────────────────────────────────┐
-│  OMEN 35L Server (Windows 11)           │
+│  GPU-Accelerated Server (Windows 11)    │
 │  ┌────────────────────────────────┐     │
 │  │  Ollama Server :11434          │     │
 │  │  ├─ Qwen 2.5 Coder 32B         │     │
@@ -57,7 +57,7 @@ AirGapAICoder is an enterprise air-gapped AI coding assistant system that runs c
 
 ## Hardware Requirements
 
-### Server (OMEN 35L)
+### Server (GPU-Accelerated)
 - **GPU**: NVIDIA with 24GB+ VRAM (32GB+ recommended for 32B models)
 - **RAM**: 32GB+ system RAM
 - **Storage**: 100GB+ free space for models and cache

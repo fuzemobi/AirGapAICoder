@@ -201,7 +201,7 @@ AirGapAICoder provides enterprise-grade AI-assisted coding capabilities in compl
 
 ## 5. System Requirements
 
-### 5.1 Server Hardware (OMEN 35L)
+### 5.1 Server Hardware (GPU-Accelerated Server)
 
 | Component | Minimum | Recommended | Optimal |
 |-----------|---------|-------------|---------|
