@@ -390,6 +390,9 @@ main() {
     echo "================================================================"
     echo
 
+    # Create download directory first (needed for logging)
+    mkdir -p "$DOWNLOAD_DIR"
+
     check_prerequisites
     create_directory_structure
 
