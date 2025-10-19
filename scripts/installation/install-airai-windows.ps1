@@ -116,7 +116,7 @@ function Test-AirAICommand {
             Write-StatusMessage "You may need to restart your terminal or add Python Scripts to PATH" "Warning"
 
             # Show where Python Scripts directory is
-            $scriptsPath = & $PythonPath -c "import sys, os; print(os.path.join(sys.prefix, 'Scripts'))"
+            $scriptsPath = & $PythonPath -c 'import sys, os; print(os.path.join(sys.prefix, "Scripts"))'
             Write-StatusMessage "Python Scripts location: $scriptsPath" "Info"
 
             return $false
@@ -141,9 +141,9 @@ function Show-NextSteps {
     Write-Host "  5. Get help: airai --help" -ForegroundColor White
     Write-Host ""
     Write-Host "Quick Examples:" -ForegroundColor Yellow
-    Write-Host "  airai chat qwen-32b-cline ""Write a Python function""" -ForegroundColor Cyan
+    Write-Host '  airai chat qwen-32b-cline "Write a Python function"' -ForegroundColor Cyan
     Write-Host "  airai code review src/" -ForegroundColor Cyan
-    Write-Host "  airai code edit app.py ""add error handling""" -ForegroundColor Cyan
+    Write-Host '  airai code edit app.py "add error handling"' -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Documentation: https://github.com/fuzemobi/AirGapAICoder" -ForegroundColor White
     Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
