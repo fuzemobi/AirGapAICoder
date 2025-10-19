@@ -5,6 +5,33 @@ All notable changes to AirGapAICoder will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-10-19
+
+### Added
+- **Comprehensive Quickstart Guide** in README.md
+  - 5-step process from zero to AI coding
+  - Platform-specific installation commands
+  - Quick examples for code generation, review, refactoring, documentation
+  - Python, curl, and PowerShell usage examples
+- **Project Status Section** in README
+  - Current version and testing status
+  - Recent updates summary
+  - Platform testing status
+  - Community links
+- **Enhanced Roadmap** with version-specific milestones
+  - v1.0 (Current) - Core platform features
+  - v1.1 (Q1 2026) - Containerization with Podman
+  - v1.2 (Q2 2026) - Web-based management
+  - v2.0 (Q3-Q4 2026) - Enterprise features
+
+### Changed
+- Reorganized README for better flow and discoverability
+- Simplified deployment process description
+- Updated table of contents with Quickstart Guide
+- Enhanced roadmap with clearer timelines and deliverables
+
+---
+
 ## [1.0.1] - 2025-10-19
 
 ### Changed

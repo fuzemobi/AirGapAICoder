@@ -4,7 +4,7 @@
 
 A complete solution for running powerful AI-assisted coding tools in secure, offline environments using open-source models and local GPU acceleration.
 
-![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%2011-blue.svg)
 ![GPU](https://img.shields.io/badge/GPU-NVIDIA-green.svg)
@@ -13,8 +13,9 @@ A complete solution for running powerful AI-assisted coding tools in secure, off
 
 - [Overview](#overview)
 - [Features](#features)
+- [Quickstart Guide](#quickstart-guide)
 - [System Requirements](#system-requirements)
-- [Quick Start](#quick-start)
+- [Deployment Process](#deployment-process)
 - [Documentation](#documentation)
 - [Architecture](#architecture)
 - [Contributing](#contributing)
@@ -54,6 +55,169 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 | **DeepSeek R1 32B** | 32 Billion | 24GB | 131k tokens | Complex reasoning, algorithms |
 | **Qwen 2.5 Coder 14B** | 14 Billion | 12GB | 131k tokens | Lightweight, faster responses |
 
+## 🚀 Quickstart Guide
+
+### From Zero to AI Coding in 5 Steps
+
+**Prerequisites:** A server with NVIDIA GPU and one internet-connected computer for preparation.
+
+#### Step 1: Prepare Package (Internet-Connected System)
+
+```bash
+# Clone repository
+git clone https://github.com/fuzemobi/AirGapAICoder.git
+cd AirGapAICoder
+
+# Run preparation script (downloads Ollama + models)
+cd scripts/preparation
+./pull-all.sh
+
+# For production models (47GB), first run:
+export PULL_PRODUCTION_MODELS=true
+./pull-all.sh
+
+# Package is created at ~/airgap-package
+```
+
+**Windows (PowerShell):**
+```powershell
+git clone https://github.com/fuzemobi/AirGapAICoder.git
+cd AirGapAICoder\scripts\preparation
+.\pull-all.ps1
+```
+
+#### Step 2: Transfer to Air-Gap Server
+
+```bash
+# Copy to USB drive
+cp -r ~/airgap-package /Volumes/USB/
+
+# On server, copy from USB
+cp -r /media/USB/airgap-package ~/
+```
+
+#### Step 3: Install on Server
+
+**Windows Server:**
+```powershell
+cd scripts\installation\server
+.\install-windows.ps1 C:\airgap-package
+```
+
+**Ubuntu Server:**
+```bash
+cd scripts/installation/server
+sudo ./install-ubuntu.sh ~/airgap-package
+```
+
+**macOS (Testing):**
+```bash
+cd scripts/installation/server
+./install-macos.sh ~/airgap-package
+```
+
+#### Step 4: Verify Server
+
+```bash
+# Check server health
+curl http://localhost:11434/api/tags
+
+# Or from another machine on network
+curl http://SERVER_IP:11434/api/tags
+
+# List models
+ollama list
+```
+
+#### Step 5: Start Using AI!
+
+**From ANY Terminal:**
+
+```bash
+# Using CLI wrapper
+./scripts/cli/ollama-cli.sh run SERVER_IP:11434 qwen-32b-cline \
+  "Write a Python function to calculate prime numbers"
+
+# Using curl directly
+curl http://SERVER_IP:11434/api/generate -d '{
+  "model": "qwen-32b-cline",
+  "prompt": "Write a REST API endpoint in Python FastAPI",
+  "stream": false
+}' | jq -r '.response'
+
+# Using PowerShell
+Invoke-RestMethod http://SERVER_IP:11434/api/generate -Method POST -Body '{
+  "model": "qwen-32b-cline",
+  "prompt": "Create a React component for user login",
+  "stream": false
+}' -ContentType "application/json" | Select -ExpandProperty response
+```
+
+**From Python:**
+```python
+import requests
+
+response = requests.post('http://SERVER_IP:11434/api/generate', json={
+    'model': 'qwen-32b-cline',
+    'prompt': 'Write a Python function to validate email addresses',
+    'stream': False
+})
+print(response.json()['response'])
+```
+
+**Optional: VS Code + Cline**
+
+If you prefer a GUI:
+1. Install VS Code
+2. Install Cline extension from package
+3. Configure: Settings → Base URL: `http://SERVER_IP:11434`
+4. Start chatting in Cline sidebar
+
+### Quick Examples
+
+**Code Generation:**
+```bash
+# Generate a complete Python module
+./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
+  "Create a Python class for managing a shopping cart with add, remove, checkout methods"
+
+# Generate tests
+./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
+  "Write pytest tests for this function: $(cat mycode.py)"
+```
+
+**Code Review:**
+```bash
+# Review code for issues
+curl http://SERVER:11434/api/generate -d "{
+  \"model\": \"qwen-32b-cline\",
+  \"prompt\": \"Review this code for bugs and security issues: $(cat app.py)\",
+  \"stream\": false
+}" | jq -r '.response'
+```
+
+**Refactoring:**
+```bash
+# Improve code quality
+./scripts/cli/ollama-cli.sh run SERVER:11434 deepseek-r1-32b-cline \
+  "Refactor this code to use async/await and add error handling: $(cat sync_code.py)"
+```
+
+**Documentation:**
+```bash
+# Generate docstrings
+./scripts/cli/ollama-cli.sh run SERVER:11434 qwen-32b-cline \
+  "Add comprehensive docstrings to: $(cat module.py)" > documented_module.py
+```
+
+### That's It!
+
+You now have a fully functional, air-gapped AI coding assistant accessible from any terminal, any platform, anywhere on your network.
+
+**No cloud required. No subscriptions. No data leakage. Complete control.**
+
+---
+
 ## 💻 System Requirements
 
 ### Server (AI Inference Host)
@@ -82,110 +246,20 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 - **NVIDIA Driver** - GPU acceleration
 - **CUDA Toolkit** - GPU computing platform
 
-## 🚀 Quick Start
+## 📦 Deployment Process
 
-### Overview
+The full deployment follows three phases:
 
-The deployment process has three phases:
+1. **Preparation** (Internet-connected) - Download Ollama, models, and dependencies
+2. **Transfer** (USB/removable media) - Move ~50GB package to air-gap server
+3. **Installation** (Air-gapped server) - Automated setup with scripts
 
-1. **Preparation** (Internet-connected staging system)
-2. **Transfer** (USB/removable media)
-3. **Installation** (Air-gapped target server)
+See [Quickstart Guide](#quickstart-guide) above for step-by-step instructions.
 
-### Phase 1: Preparation (Requires Internet)
-
-On an internet-connected Windows system:
-
-```powershell
-# 1. Create staging directory
-New-Item -ItemType Directory -Path "C:\AirGapStaging" -Force
-Set-Location C:\AirGapStaging
-
-# 2. Download Ollama
-# Visit https://ollama.com/download and save OllamaSetup.exe
-
-# 3. Download VS Code
-# Visit https://code.visualstudio.com/download and save VSCodeSetup.exe
-
-# 4. Download NVIDIA CUDA
-# Visit https://developer.nvidia.com/cuda-downloads
-
-# 5. Install Ollama on staging system
-.\OllamaSetup.exe
-
-# 6. Download AI models (this takes time!)
-ollama pull qwen2.5-coder:32b-instruct-fp16  # ~19GB
-ollama pull deepseek-r1:32b                   # ~19GB
-ollama pull qwen2.5-coder:14b                 # ~9GB
-
-# 7. Download Cline extension
-# Visit https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev
-# Click "Download Extension"
-
-# 8. Package everything for transfer
-# Follow detailed instructions in docs/INSTALLATION.md
-```
-
-### Phase 2: Transfer to Air-Gap
-
-```powershell
-# Copy the complete package to USB drive
-Copy-Item -Path "C:\AirGapStaging" -Destination "E:\" -Recurse
-
-# Total package size: ~50GB
-```
-
-### Phase 3: Server Installation
-
-On the air-gapped target server:
-
-```powershell
-# 1. Copy package from USB to server
-Copy-Item -Path "E:\AirGapStaging" -Destination "C:\AirGapInstall" -Recurse
-
-# 2. Open PowerShell as Administrator
-Set-Location C:\AirGapInstall
-
-# 3. Run automated installation
-.\scripts\install-server.ps1
-
-# Installation completes in ~30 minutes
-```
-
-### Phase 4: Client Setup
-
-On each developer workstation:
-
-```powershell
-# 1. Copy client files from server
-# 2. Open PowerShell
-Set-Location "path\to\client\files"
-
-# 3. Run client installation
-.\scripts\install-client.ps1
-
-# 4. Enter server IP when prompted
-# Example: 192.168.1.100
-
-# Installation completes in ~5 minutes
-```
-
-### Phase 5: Start Using AI!
-
-**From Any Terminal:**
-```bash
-# Check server status
-./scripts/cli/ollama-cli.sh status 192.168.1.100:11434
-
-# Generate code
-./scripts/cli/ollama-cli.sh run 192.168.1.100:11434 qwen-32b-cline \
-  "Write a Python FastAPI application with user authentication"
-```
-
-**Or use VS Code + Cline (Optional):**
-1. **Launch VS Code**
-2. **Open Cline** (click icon in sidebar or `Ctrl+Shift+P` → "Cline: Open")
-3. **Start chatting with AI**
+**Detailed guides available:**
+- [SERVER-SETUP.md](docs/SERVER-SETUP.md) - Complete server deployment
+- [INSTALLATION.md](docs/INSTALLATION.md) - Detailed installation procedures
+- [CLI-USAGE.md](docs/CLI-USAGE.md) - Terminal usage examples
 
 ## 📚 Documentation
 
@@ -358,29 +432,39 @@ See [Operations Guide](docs/OPERATIONS.md) for complete troubleshooting.
 
 ## 🗺️ Roadmap
 
-### Phase 1: Core Functionality (Current)
-- ✅ Basic air-gap deployment
-- ✅ Multi-user support
-- ✅ GPU acceleration
-- ✅ VS Code integration
+### v1.0 - Core Platform (Current) ✅
+- ✅ Air-gap deployment automation
+- ✅ Multi-platform support (Windows Server, Ubuntu, macOS)
+- ✅ Universal CLI access from any terminal
+- ✅ GPU-accelerated inference
+- ✅ Multi-user network support
+- ✅ Extended 131k token context windows
+- ✅ Service monitoring and auto-restart
+- ✅ Comprehensive documentation
 
-### Phase 2: Enhanced Management (Q2 2025)
+### v1.1 - Containerization (Q1 2026)
+- 🔜 Podman-based deployment
+- 🔜 Pre-built container images
+- 🔜 Windows Server container support
+- 🔜 AMD Ryzen 7 optimization
+- 🔜 Simplified updates via containers
+- 🔜 Container orchestration scripts
+
+### v1.2 - Enhanced Management (Q2 2026)
 - 🔜 Web-based admin dashboard
-- 🔜 Advanced monitoring and metrics
-- 🔜 Automated health checks
-- 🔜 Performance analytics
+- 🔜 Real-time metrics and analytics
+- 🔜 Advanced monitoring alerts
+- 🔜 Performance profiling tools
+- 🔜 User activity tracking
 
-### Phase 3: Advanced Features (Q3 2025)
+### v2.0 - Enterprise Features (Q3-Q4 2026)
 - 🔜 Multi-GPU support
 - 🔜 Load balancing across servers
 - 🔜 RAG (Retrieval-Augmented Generation)
 - 🔜 Custom model fine-tuning
-
-### Phase 4: Enterprise Features (Q4 2025)
 - 🔜 RBAC (Role-Based Access Control)
 - 🔜 TLS/SSL encryption
 - 🔜 Advanced audit logging
-- 🔜 JetBrains IDE support
 
 ## 🤝 Contributing
 
@@ -433,6 +517,45 @@ For issues, questions, or suggestions:
 ## ⚠️ Disclaimer
 
 This solution is designed for legal, defensive security purposes only. Users are responsible for ensuring compliance with all applicable licenses, regulations, and organizational policies.
+
+---
+
+---
+
+## 🎯 Project Status
+
+**Current Version:** 1.0.2
+**Status:** Production Ready
+**Last Updated:** 2025-10-19
+
+### Recent Updates
+
+- ✅ Universal CLI access from any terminal
+- ✅ Comprehensive quickstart guide
+- ✅ Multi-platform installation scripts
+- ✅ Service monitoring and auto-restart
+- ✅ Complete documentation suite
+
+### What's Working
+
+- **Preparation Scripts**: Download and package components for air-gap
+- **Installation Scripts**: Automated setup for Windows, Ubuntu, macOS
+- **CLI Tools**: Remote management from any terminal
+- **Monitoring**: Health checks with automatic restart
+- **Documentation**: Complete guides for deployment and usage
+
+### Tested Platforms
+
+- ✅ macOS (development and testing)
+- ⚙️ Windows Server 2022 (scripts ready, pending hardware testing)
+- ⚙️ Ubuntu Server 22.04+ (scripts ready, pending hardware testing)
+
+### Community
+
+- **GitHub Repository**: https://github.com/fuzemobi/AirGapAICoder
+- **Issues**: Report bugs or request features
+- **Discussions**: Share your deployment experiences
+- **Contributions**: Pull requests welcome!
 
 ---
 
