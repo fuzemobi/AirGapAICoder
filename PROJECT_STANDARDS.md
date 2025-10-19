@@ -260,7 +260,7 @@ Provide a comprehensive report:
 ```markdown
 ## Change Summary
 
-**Classification:** Significant Change  
+**Classification:** Significant Change
 **Affected Components:** [List]
 
 ### Changes Made
@@ -285,6 +285,65 @@ Provide a comprehensive report:
 # Example of new/changed functionality
 ```
 ```
+
+#### STEP 7: COMMIT AND PUSH (MANDATORY)
+
+After completing implementation, testing, and documentation:
+
+**You MUST commit and push all changes to the repository:**
+
+```bash
+# Stage all changes
+git add -A
+
+# Commit with descriptive message (see CLAUDE.md for format)
+git commit -m "Descriptive commit message
+
+- Feature/fix details
+- Testing completed
+- Documentation updated
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# Push to remote
+git push
+```
+
+**Commit Message Requirements:**
+- Clear, descriptive title (50 chars or less)
+- Detailed body explaining WHAT changed and WHY
+- List of major changes
+- Testing status
+- Documentation updates
+- Always include Claude Code attribution
+
+**When to Commit:**
+- ✅ After all tests pass
+- ✅ After documentation is updated
+- ✅ After code review (if applicable)
+- ✅ Before marking work as complete
+
+**What to Include:**
+- All code changes
+- All documentation updates
+- All test files
+- Configuration changes
+- New scripts or assets
+
+**NEVER commit:**
+- ❌ Secrets or credentials
+- ❌ Large binary files (unless required)
+- ❌ Temporary or cache files
+- ❌ Files in .gitignore
+
+This ensures:
+1. All work is version-controlled
+2. Changes are backed up remotely
+3. Team members can see updates
+4. Work is properly attributed
+5. Project history is maintained
 
 ---
 
@@ -318,12 +377,31 @@ For trivial changes, follow this condensed workflow:
 ```markdown
 ## Trivial Change
 
-**Type:** [Bug fix/Comment/Formatting/etc.]  
-**File:** [filename]  
+**Type:** [Bug fix/Comment/Formatting/etc.]
+**File:** [filename]
 **Change:** [Brief description]
 
 No security impact. No architectural changes.
 ```
+
+#### Commit and Push (MANDATORY)
+
+Even for trivial changes, you MUST commit and push:
+
+```bash
+git add -A
+git commit -m "Brief description of trivial change
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+git push
+```
+
+**Trivial commits can be shorter but must still:**
+- Clearly describe the change
+- Include attribution
+- Be pushed to remote
 
 ---
 
