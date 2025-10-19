@@ -2,9 +2,27 @@
 
 ## Document Information
 
-- **Version**: 1.0
+- **Version**: 1.1.0
 - **Date**: 2025-10-19
-- **Status**: Design Phase
+- **Status**: Production
+
+---
+
+## ⚠️ IMPORTANT: Documentation Standards
+
+**This file MUST be kept up-to-date per PROJECT_STANDARDS.md requirements.**
+
+**When to update this file:**
+- Component structure changes
+- Data flows are modified
+- APIs or interfaces change
+- New architectural patterns are introduced
+- Deployment architecture changes
+- Security model changes
+
+**See `PROJECT_STANDARDS.md` Section 5.1 for complete documentation requirements.**
+
+---
 
 ## 1. Architecture Overview
 

@@ -2,11 +2,34 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## ⚠️ MANDATORY: Project Standards
+
+**YOU MUST read and strictly follow ALL standards defined in `PROJECT_STANDARDS.md` before starting any work.**
+
+**At the beginning of EVERY session:**
+1. ✅ Read `PROJECT_STANDARDS.md` in its entirety
+2. ✅ Understand the mandatory workflows for Significant vs. Trivial changes
+3. ✅ Apply all Universal Rules to EVERY change
+4. ✅ Update `docs/ARCHITECTURE.md` and `README.md` as required
+5. ✅ Complete security reviews for all code changes
+
+**You are required to act as ALL of the following simultaneously:**
+- Software Architect
+- Lead Developer
+- Security Architect
+- QA Engineer
+
+**See `PROJECT_STANDARDS.md` for complete requirements.**
+
+---
+
 ## Project Purpose
 
 AirGapAICoder is an enterprise air-gapped AI coding assistant system that runs completely offline using local LLM inference. The system provides AI-assisted development capabilities in secure, network-isolated environments.
 
-**Target Deployment**: Windows 11 server with high-end NVIDIA GPU, accessible via local network to multiple developer workstations.
+**Target Deployment**: GPU-accelerated server, accessible via local network to multiple developer workstations.
 
 ## System Architecture
 
