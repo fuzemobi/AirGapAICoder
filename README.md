@@ -4,6 +4,7 @@
 
 A complete solution for running powerful AI-assisted coding tools in secure, offline environments using open-source models and local GPU acceleration.
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%2011-blue.svg)
 ![GPU](https://img.shields.io/badge/GPU-NVIDIA-green.svg)
@@ -361,7 +362,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```powershell
 # Clone repository
-git clone https://github.com/YourUsername/AirGapAICoder.git
+git clone https://github.com/fuzemobi/AirGapAICoder.git
 cd AirGapAICoder
 
 # Follow installation guide
@@ -390,8 +391,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For issues, questions, or suggestions:
 
 - 📖 Check the [documentation](docs/)
-- 🐛 Open an [issue](https://github.com/YourUsername/AirGapAICoder/issues)
-- 💬 Start a [discussion](https://github.com/YourUsername/AirGapAICoder/discussions)
+- 🐛 Open an [issue](https://github.com/fuzemobi/AirGapAICoder/issues)
+- 💬 Start a [discussion](https://github.com/fuzemobi/AirGapAICoder/discussions)
 
 ## ⚠️ Disclaimer
 
