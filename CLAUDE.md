@@ -4,16 +4,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## 📋 Standards Hierarchy
+
+This project follows a **two-tier standards system**:
+
+### 1. Global Standards (Applies to ALL Your Projects)
+**Location:** `~/.claude/CLAUDE.md`
+
+Universal development standards that apply to every project:
+- Code quality and best practices
+- Security standards (OWASP Top 10, input validation)
+- Git workflow (mandatory commit-and-push)
+- Documentation requirements
+- Testing standards
+- Language-specific best practices
+
+**These are automatically loaded for every project you work on.**
+
+### 2. Project-Specific Standards (AirGapAICoder)
+**Location:** `PROJECT_STANDARDS.md` (this repository)
+
+AirGapAICoder-specific requirements that **extend and override** global standards:
+- Multi-persona approach (Architect, Developer, Security, QA)
+- Change classification system (Significant vs. Trivial)
+- Air-gap deployment considerations
+- Project-specific workflows and checklists
+
+---
+
 ## ⚠️ MANDATORY: Project Standards
 
 **YOU MUST read and strictly follow ALL standards defined in `PROJECT_STANDARDS.md` before starting any work.**
 
 **At the beginning of EVERY session:**
-1. ✅ Read `PROJECT_STANDARDS.md` in its entirety
-2. ✅ Understand the mandatory workflows for Significant vs. Trivial changes
-3. ✅ Apply all Universal Rules to EVERY change
-4. ✅ Update `docs/ARCHITECTURE.md` and `README.md` as required
-5. ✅ Complete security reviews for all code changes
+1. ✅ Apply **global standards** from `~/.claude/CLAUDE.md` (automatic)
+2. ✅ Read `PROJECT_STANDARDS.md` in its entirety
+3. ✅ Understand the mandatory workflows for Significant vs. Trivial changes
+4. ✅ Apply all Universal Rules to EVERY change
+5. ✅ Update `docs/ARCHITECTURE.md` and `README.md` as required
+6. ✅ Complete security reviews for all code changes
+7. ✅ **Commit and push** all tested changes (global standard)
 
 **You are required to act as ALL of the following simultaneously:**
 - Software Architect
