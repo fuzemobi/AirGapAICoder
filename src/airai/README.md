@@ -19,7 +19,41 @@ AirAI is a powerful CLI tool for managing Ollama servers and interacting with AI
 
 ## Installation
 
-### From Source (Development)
+### Quick Install (Recommended)
+
+**Windows (PowerShell - Run as Administrator):**
+```powershell
+# Clone repository
+git clone https://github.com/fuzemobi/AirGapAICoder.git
+cd AirGapAICoder
+
+# Run automated installer
+.\scripts\installation\install-airai-windows.ps1
+
+# Restart terminal and verify
+airai --version
+```
+
+**macOS / Linux (bash/zsh):**
+```bash
+# Clone repository
+git clone https://github.com/fuzemobi/AirGapAICoder.git
+cd AirGapAICoder
+
+# Run automated installer
+./scripts/installation/install-airai.sh
+
+# Restart terminal and verify
+airai --version
+```
+
+The automated installers will:
+- ✅ Check for Python 3.9+ (prompt to install if missing)
+- ✅ Ensure pip is available
+- ✅ Install AirAI CLI globally
+- ✅ Verify installation and provide helpful next steps
+
+### Manual Installation (Development)
 
 ```bash
 # Clone repository
@@ -33,16 +67,33 @@ pip install -e .
 airai --version
 ```
 
-### From Wheel (Air-Gap Deployment)
+### Air-Gap Deployment (Offline Systems)
 
 ```bash
-# Build wheel
+# On internet-connected system:
+# 1. Build wheel
 python -m build
 
-# Transfer wheel to air-gap system
+# 2. Transfer wheel to air-gap system via USB
 
-# Install from wheel
-pip install dist/airai-1.1.0-py3-none-any.whl --no-index
+# On air-gap system:
+# Windows
+.\scripts\installation\install-airai-windows.ps1 -WheelPath "path\to\airai-1.1.0-py3-none-any.whl"
+
+# macOS/Linux
+WHEEL_PATH="path/to/airai-1.1.0-py3-none-any.whl" ./scripts/installation/install-airai.sh
+```
+
+### Uninstall
+
+**Windows:**
+```powershell
+.\scripts\installation\uninstall-airai-windows.ps1
+```
+
+**macOS / Linux:**
+```bash
+./scripts/installation/uninstall-airai.sh
 ```
 
 ## Quick Start

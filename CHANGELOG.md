@@ -5,6 +5,69 @@ All notable changes to AirGapAICoder will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - One-Command Global Installation
+
+#### Automated Installation Scripts
+- **install-airai-windows.ps1** - PowerShell installer for Windows
+  - Checks for Python 3.9+ installation
+  - Ensures pip is available
+  - Installs AirAI CLI globally
+  - Verifies command availability
+  - Beautiful colored output with status messages
+  - Supports wheel-based air-gap installation
+- **install-airai.sh** - Bash installer for macOS/Linux
+  - Cross-platform Python version detection
+  - macOS Homebrew Python support (--break-system-packages)
+  - Automatic PATH configuration hints
+  - Air-gap deployment support
+  - Beautiful terminal output with colors
+- **uninstall-airai-windows.ps1** - PowerShell uninstaller
+- **uninstall-airai.sh** - Bash uninstaller
+
+#### Key Features
+- ✅ **One-command installation** - No manual pip/Python management
+- ✅ **Platform detection** - Handles macOS, Linux, Windows differences
+- ✅ **Python 3.9+ validation** - Clear error messages if not met
+- ✅ **pip bootstrapping** - Auto-installs pip if missing
+- ✅ **PATH verification** - Tests that `airai` command is accessible
+- ✅ **Air-gap support** - Install from wheel files offline
+- ✅ **Helpful guidance** - Clear next steps after installation
+
+#### Documentation Updates
+- Updated `src/airai/README.md` with Quick Install section
+- Updated main `README.md` with one-command installation example
+- Added installation examples to Quick Start section
+- Added uninstall instructions
+
+### Technical Details
+
+**Script Capabilities:**
+- Automatic Python version parsing (compatible with GNU and BSD tools)
+- macOS externally-managed environment handling
+- Clear error messages and troubleshooting hints
+- Success verification with version output
+- Executable permissions set automatically (Unix)
+
+**Installation Methods:**
+1. **Development Install**: `pip install -e .` from source
+2. **Air-Gap Install**: From wheel file with `--no-index`
+3. **User Install**: `--user` flag for non-sudo (Windows)
+4. **System Install**: `--break-system-packages` for macOS Homebrew
+
+### Changed
+- Enhanced `pyproject.toml` console script entry point (`airai = "airai.cli:main"`)
+- Improved installation documentation across all READMEs
+
+### Benefits
+- **Developer Experience**: Get started in 30 seconds instead of manual setup
+- **Enterprise Deployment**: Scriptable installation for IT automation
+- **Offline Support**: Works in air-gapped environments with wheels
+- **Cross-Platform**: Identical experience on Windows, macOS, Linux
+
+---
+
 ## [1.1.0] - 2025-10-19
 
 ### 🎉 Major Release - Containerization & AirAI CLI

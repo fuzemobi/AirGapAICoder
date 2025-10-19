@@ -82,9 +82,34 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 - AI-assisted code editing and review
 - Simplified management commands
 - Cross-platform support
+- One-command global installation
 - See: [AirAI README](src/airai/README.md)
 
 ### Quick Example
+
+#### Install AirAI CLI Globally (One Command!)
+
+```bash
+# Clone repository
+git clone https://github.com/fuzemobi/AirGapAICoder.git
+cd AirGapAICoder
+
+# Windows (PowerShell - Run as Administrator)
+.\scripts\installation\install-airai-windows.ps1
+
+# macOS / Linux
+./scripts/installation/install-airai.sh
+
+# Restart terminal and verify
+airai --version
+
+# Start using immediately!
+airai chat qwen-32b-cline "Write a Python hello world"
+airai code review src/
+airai code edit app.py "add error handling"
+```
+
+#### Full Server Deployment
 
 ```bash
 # Clone and prepare (internet-connected system)
@@ -98,7 +123,7 @@ cd AirGapAICoder/scripts/preparation
 cd scripts/installation/server
 sudo ./install-ubuntu.sh ~/airgap-package
 
-# Start using AI from any terminal!
+# Access from any terminal!
 curl http://localhost:11434/api/generate -d '{
   "model": "qwen-32b-cline",
   "prompt": "Write a Python function",
