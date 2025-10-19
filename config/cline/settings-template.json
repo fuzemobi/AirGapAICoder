@@ -1,0 +1,51 @@
+{
+  "mcpServers": {},
+  "customInstructions": "",
+  "alwaysAllowReadOnly": true,
+  "alwaysAllowWriteOnly": false,
+  "task": {},
+  "browserSettings": {
+    "ignoreHttpsErrors": false,
+    "userAgent": ""
+  },
+  "apiModelOverride": {
+    "modelId": "qwen-32b-cline",
+    "apiProvider": "ollama",
+    "baseUrl": "http://SERVER_IP:11434"
+  },
+  "customModelOverride": [
+    {
+      "id": "qwen-32b-cline",
+      "name": "Qwen 2.5 Coder 32B (Local)",
+      "contextWindow": 131072,
+      "maxTokens": 8192,
+      "supportsPromptCache": false,
+      "supportsComputerUse": true,
+      "supportsImages": false,
+      "inputPrice": 0,
+      "outputPrice": 0
+    },
+    {
+      "id": "deepseek-r1-32b-cline",
+      "name": "DeepSeek R1 32B (Local)",
+      "contextWindow": 131072,
+      "maxTokens": 8192,
+      "supportsPromptCache": false,
+      "supportsComputerUse": true,
+      "supportsImages": false,
+      "inputPrice": 0,
+      "outputPrice": 0
+    },
+    {
+      "id": "qwen-14b-cline",
+      "name": "Qwen 2.5 Coder 14B (Local)",
+      "contextWindow": 131072,
+      "maxTokens": 4096,
+      "supportsPromptCache": false,
+      "supportsComputerUse": true,
+      "supportsImages": false,
+      "inputPrice": 0,
+      "outputPrice": 0
+    }
+  ]
+}

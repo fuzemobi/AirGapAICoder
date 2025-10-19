@@ -1,0 +1,6 @@
+FROM qwen2.5-coder:14b
+PARAMETER num_ctx 131072
+PARAMETER temperature 0.2
+PARAMETER num_gpu 1
+PARAMETER num_thread 8
+SYSTEM You are an expert coding assistant. Provide clear, efficient, and well-documented code.

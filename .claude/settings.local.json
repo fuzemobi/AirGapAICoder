@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__serena__list_dir",
+      "mcp__serena__activate_project",
+      "Bash(git init)",
+      "Bash(git add -A)",
+      "Bash(git commit -m \"Initial commit: AirGapAICoder - Enterprise air-gapped AI coding assistant\n\n- Complete installation and deployment documentation\n- PowerShell automation scripts\n- Configuration templates for Ollama and Cline\n- Comprehensive architecture and requirements specifications\n- Operations and maintenance guides\n- Support for Windows 11 with NVIDIA GPU\n- Multi-user network access capability\n- Extended 131k token context windows\n\nAuthor: Fuzemobi, LLC - Chad Rosenbohm\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
