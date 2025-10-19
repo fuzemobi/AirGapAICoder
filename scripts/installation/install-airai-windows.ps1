@@ -1,4 +1,5 @@
 #!/usr/bin/env powershell
+# Installer script version: 2025-10-19 v3
 # Install AirAI CLI globally on Windows
 # Part of AirGapAICoder project
 # Author: Fuzemobi, LLC - Chad Rosenbohm
@@ -14,6 +15,13 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Ensure script can run even under restrictive policies (current process only)
+try {
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force | Out-Null
+} catch {
+    # Non-fatal; continue
+}
+
 function Write-StatusMessage {
     param([string]$Message, [string]$Type = "Info")
     $colors = @{
@@ -25,26 +33,44 @@ function Write-StatusMessage {
     Write-Host "[$Type] $Message" -ForegroundColor $colors[$Type]
 }
 
+# Helper: validate Python version string 'Python X.Y'
+function Test-VersionOK {
+    param([string]$ver)
+    if ($ver -match "Python (\d+)\.(\d+)") {
+        $major = [int]$matches[1]
+        $minor = [int]$matches[2]
+        if (($major -gt 3) -or ($major -eq 3 -and $minor -ge 9)) {
+            Write-StatusMessage "Found Python $major.$minor" "Success"
+            return $true
+        } else {
+            Write-StatusMessage "Python 3.9+ required (found $major.$minor)" "Error"
+            return $false
+        }
+    }
+    return $false
+}
+
 function Test-PythonInstalled {
     Write-StatusMessage "Checking for Python installation..."
+
+
+    # First try provided PythonPath
     try {
         $version = & $PythonPath --version 2>&1
-        if ($version -match "Python (\d+)\.(\d+)") {
-            $major = [int]$matches[1]
-            $minor = [int]$matches[2]
+        if (Test-VersionOK $version) { return $true }
+    } catch {}
 
-            if ($major -ge 3 -and $minor -ge 9) {
-                Write-StatusMessage "Found Python $major.$minor" "Success"
-                return $true
-            } else {
-                Write-StatusMessage "Python 3.9+ required (found $major.$minor)" "Error"
-                return $false
-            }
+    # Fallback: use Python launcher if available
+    try {
+        $version = & py -3 --version 2>&1
+        if (Test-VersionOK $version) {
+            $script:PythonPath = "py"
+            Write-StatusMessage "Using Python via Windows launcher: py -3" "Info"
+            return $true
         }
-    } catch {
-        Write-StatusMessage "Python not found. Please install Python 3.9+ from python.org" "Error"
-        return $false
-    }
+    } catch {}
+
+    Write-StatusMessage "Python not found. Please install Python 3.9+ from https://www.python.org/downloads/" "Error"
     return $false
 }
 
@@ -67,6 +93,47 @@ function Test-PipInstalled {
     }
 }
 
+function Ensure-Toolchain {
+    Write-StatusMessage "Upgrading pip/setuptools/wheel..."
+    try {
+        $code = Invoke-PipInstall @("install", "--upgrade", "pip", "setuptools", "wheel")
+        if ($code -eq 0) {
+            Write-StatusMessage "Toolchain up-to-date" "Success"
+            return $true
+        } else {
+            Write-StatusMessage "Toolchain upgrade returned exit code $code (continuing)" "Warning"
+            return $false
+        }
+    } catch {
+        Write-StatusMessage "Toolchain upgrade error: $($_.Exception.Message) (continuing)" "Warning"
+        return $false
+    }
+}
+
+function Invoke-PipInstall {
+    param([string[]]$Args)
+    try {
+        $null = & $PythonPath -m pip @Args
+        if ($LASTEXITCODE -eq 0) { return 0 }
+        if ($Args -notcontains "--user") {
+            Write-StatusMessage "Retrying install with --user (no admin required)..." "Warning"
+            $null = & $PythonPath -m pip @Args --user
+            return $LASTEXITCODE
+        } else {
+            return $LASTEXITCODE
+        }
+    } catch {
+        if ($Args -notcontains "--user") {
+            Write-StatusMessage "Initial install failed: $($_.Exception.Message). Retrying with --user..." "Warning"
+            $null = & $PythonPath -m pip @Args --user
+            return $LASTEXITCODE
+        } else {
+            Write-StatusMessage "Install error: $($_.Exception.Message)" "Error"
+            return 1
+        }
+    }
+}
+
 function Install-AirAI {
     Write-StatusMessage "Installing AirAI CLI..."
 
@@ -77,20 +144,21 @@ function Install-AirAI {
                 Write-StatusMessage "Wheel file not found: $WheelPath" "Error"
                 return $false
             }
-            Write-StatusMessage "Installing from wheel: $WheelPath"
-            & $PythonPath -m pip install $WheelPath --no-index --force-reinstall
+            $resolvedWheel = (Resolve-Path -LiteralPath $WheelPath).Path
+            Write-StatusMessage "Installing from wheel: $resolvedWheel"
+            $exitCode = Invoke-PipInstall @("install", $resolvedWheel, "--no-index", "--force-reinstall")
         } else {
             # Install from source (development)
             $projectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
             Write-StatusMessage "Installing from source: $projectRoot"
-            & $PythonPath -m pip install -e $projectRoot
+            $exitCode = Invoke-PipInstall @("install", "-e", $projectRoot)
         }
 
-        if ($LASTEXITCODE -eq 0) {
+        if ($exitCode -eq 0) {
             Write-StatusMessage "AirAI CLI installed successfully!" "Success"
             return $true
         } else {
-            Write-StatusMessage "Installation failed with exit code $LASTEXITCODE" "Error"
+            Write-StatusMessage "Installation failed with exit code $exitCode" "Error"
             return $false
         }
     } catch {
@@ -102,36 +170,59 @@ function Install-AirAI {
 function Test-AirAICommand {
     Write-StatusMessage "Verifying airai command..."
 
-    try {
-        # Refresh PATH for current session
-        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
-                    [System.Environment]::GetEnvironmentVariable("Path","User")
+    # Refresh PATH for current session
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
+                [System.Environment]::GetEnvironmentVariable("Path","User")
 
-        $version = & airai --version 2>&1
+    # First, see if the 'airai' shim exists on PATH without throwing
+    $airaiCmd = $null
+    try { $airaiCmd = Get-Command airai -ErrorAction SilentlyContinue } catch {}
+
+    if ($airaiCmd) {
+        try {
+            $version = & airai --version 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-StatusMessage "✓ airai command is available: $version" "Success"
+                return $true
+            }
+        } catch {
+            # Fall through to module check
+        }
+    }
+
+    # Try module execution as a fallback (works even if PATH not updated)
+    try {
+        $version2 = & $PythonPath -m airai --version 2>&1
         if ($LASTEXITCODE -eq 0) {
-            Write-StatusMessage "✓ airai command is available: $version" "Success"
-            return $true
-        } else {
-            Write-StatusMessage "airai command not found in PATH" "Warning"
-            Write-StatusMessage "You may need to restart your terminal or add Python Scripts to PATH" "Warning"
+            Write-StatusMessage "✓ AirAI is installed: $version2" "Success"
+            Write-StatusMessage "airai command not yet on PATH. You may need to restart your terminal or add Python Scripts to PATH" "Warning"
 
             # Show where Python Scripts directory is
             $scriptsPath = & $PythonPath -c 'import sys, os; print(os.path.join(sys.prefix, "Scripts"))'
-            Write-StatusMessage "Python Scripts location: $scriptsPath" "Info"
-
-            return $false
+            $userScriptsPath = & $PythonPath -c 'import site, os; p=site.getusersitepackages(); print(os.path.join(os.path.dirname(p), "Scripts"))'
+            Write-StatusMessage "Python Scripts (system): $scriptsPath" "Info"
+            Write-StatusMessage "Python Scripts (user --user): $userScriptsPath" "Info"
+            return $true
         }
     } catch {
-        Write-StatusMessage "Verification error: $($_.Exception.Message)" "Warning"
-        return $false
+        # ignore and proceed to info output below
     }
+
+    Write-StatusMessage "airai command not found and module execution failed" "Warning"
+
+    # Show where Python Scripts directory is
+    $scriptsPath = & $PythonPath -c 'import sys, os; print(os.path.join(sys.prefix, "Scripts"))'
+    $userScriptsPath = & $PythonPath -c 'import site, os; p=site.getusersitepackages(); print(os.path.join(os.path.dirname(p), "Scripts"))'
+    Write-StatusMessage "Python Scripts (system): $scriptsPath" "Info"
+    Write-StatusMessage "Python Scripts (user --user): $userScriptsPath" "Info"
+    return $false
 }
 
 function Show-NextSteps {
     Write-Host ""
-    Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=======================================================" -ForegroundColor Cyan
     Write-Host "  AirAI CLI Installation Complete!" -ForegroundColor Green
-    Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "=======================================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Next Steps:" -ForegroundColor Yellow
     Write-Host "  1. Restart your terminal (or run: refreshenv)" -ForegroundColor White
@@ -152,40 +243,50 @@ function Show-NextSteps {
 
 # Main installation flow
 Write-Host ""
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host "  AirAI CLI - Global Installation for Windows" -ForegroundColor Cyan
-Write-Host "═══════════════════════════════════════════════════════" -ForegroundColor Cyan
+Write-Host "=======================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 1: Check Python
-if (-not (Test-PythonInstalled)) {
-    Write-StatusMessage "Please install Python 3.9+ from https://www.python.org/downloads/" "Error"
-    Write-StatusMessage "Make sure to check 'Add Python to PATH' during installation" "Info"
-    exit 1
+# Ensure we run from the installer directory (working directory change)
+Push-Location -Path $PSScriptRoot
+try {
+    # Step 1: Check Python
+    if (-not (Test-PythonInstalled)) {
+        Write-StatusMessage "Please install Python 3.9+ from https://www.python.org/downloads/" "Error"
+        Write-StatusMessage "Make sure to check 'Add Python to PATH' during installation" "Info"
+        exit 1
+    }
+
+    # Step 2: Check pip
+    if (-not (Test-PipInstalled)) {
+        Write-StatusMessage "Failed to install pip" "Error"
+        exit 1
+    }
+
+    # Step 2.5: Ensure base toolchain is up to date (non-fatal)
+    Ensure-Toolchain | Out-Null
+
+    # Step 3: Install AirAI
+    if (-not (Install-AirAI)) {
+        Write-StatusMessage "Installation failed" "Error"
+        exit 1
+    }
+
+    # Step 4: Verify installation
+    $commandAvailable = Test-AirAICommand
+
+    # Step 5: Show next steps
+    Show-NextSteps
+
+    if ($commandAvailable) {
+        exit 0
+    } else {
+        Write-StatusMessage "Installation completed but command verification failed" "Warning"
+        Write-StatusMessage "You may need to restart your terminal" "Warning"
+        exit 0
+    }
 }
-
-# Step 2: Check pip
-if (-not (Test-PipInstalled)) {
-    Write-StatusMessage "Failed to install pip" "Error"
-    exit 1
-}
-
-# Step 3: Install AirAI
-if (-not (Install-AirAI)) {
-    Write-StatusMessage "Installation failed" "Error"
-    exit 1
-}
-
-# Step 4: Verify installation
-$commandAvailable = Test-AirAICommand
-
-# Step 5: Show next steps
-Show-NextSteps
-
-if ($commandAvailable) {
-    exit 0
-} else {
-    Write-StatusMessage "Installation completed but command verification failed" "Warning"
-    Write-StatusMessage "You may need to restart your terminal" "Warning"
-    exit 0
+finally {
+    Pop-Location
 }
