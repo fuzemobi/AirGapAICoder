@@ -40,7 +40,8 @@ AirGapAICoder enables organizations to deploy AI-powered coding assistants in co
 - ✅ **GPU-Accelerated Inference** - High-performance local AI model execution
 - ✅ **Extended Context Windows** - 131k tokens for large codebase analysis
 - ✅ **Multi-User Support** - Network-accessible server for team collaboration
-- ✅ **IDE Integration** - Seamless VS Code integration via Cline extension
+- ✅ **Universal CLI Access** - Use from any terminal on any platform (no IDE required)
+- ✅ **Optional IDE Integration** - VS Code + Cline extension available
 - ✅ **Multiple Models** - Switch between coding and reasoning-focused models
 - ✅ **Enterprise Security** - Complete data residency and audit logging
 - ✅ **Easy Deployment** - Automated installation scripts and packaging
@@ -169,44 +170,74 @@ Set-Location "path\to\client\files"
 # Installation completes in ~5 minutes
 ```
 
-### Phase 5: Start Coding!
+### Phase 5: Start Using AI!
 
+**From Any Terminal:**
+```bash
+# Check server status
+./scripts/cli/ollama-cli.sh status 192.168.1.100:11434
+
+# Generate code
+./scripts/cli/ollama-cli.sh run 192.168.1.100:11434 qwen-32b-cline \
+  "Write a Python FastAPI application with user authentication"
+```
+
+**Or use VS Code + Cline (Optional):**
 1. **Launch VS Code**
 2. **Open Cline** (click icon in sidebar or `Ctrl+Shift+P` → "Cline: Open")
-3. **Start chatting with AI**:
-   ```
-   Create a Python FastAPI application with user authentication
-   ```
+3. **Start chatting with AI**
 
 ## 📚 Documentation
 
 Comprehensive documentation is available in the `docs/` directory:
 
-### For Users
+### Getting Started
 
-- **[Installation Guide](docs/INSTALLATION.md)** - Complete step-by-step installation
+- **[CLI Usage Guide](docs/CLI-USAGE.md)** - Use from any terminal (recommended)
+- **[Client Usage Guide](docs/CLIENT-USAGE.md)** - VS Code + Cline setup (optional)
+- **[Server Setup Guide](docs/SERVER-SETUP.md)** - Complete deployment guide
+
+### Advanced
+
+- **[Installation Guide](docs/INSTALLATION.md)** - Detailed installation procedures
 - **[Operations Guide](docs/OPERATIONS.md)** - Day-to-day operation and maintenance
+- **[Architecture](docs/ARCHITECTURE.md)** - Technical system design
+- **[Requirements](docs/REQUIREMENTS.md)** - Detailed requirements specification
 
 ### For Developers
 
 - **[CLAUDE.md](CLAUDE.md)** - Claude Code development guidance
-- **[Architecture](docs/ARCHITECTURE.md)** - Technical system design
-- **[Requirements](docs/REQUIREMENTS.md)** - Detailed requirements specification
 
 ### Quick Reference
 
-Common commands and operations:
+**CLI Usage (from any terminal):**
+
+```bash
+# Check server status
+./scripts/cli/ollama-cli.sh status SERVER_IP:11434
+
+# List models
+./scripts/cli/ollama-cli.sh models SERVER_IP:11434
+
+# Generate code
+./scripts/cli/ollama-cli.sh run SERVER_IP:11434 qwen-32b-cline "Write a Python function"
+
+# Or use HTTP API directly
+curl http://SERVER_IP:11434/api/generate -d '{
+  "model": "qwen-32b-cline",
+  "prompt": "Write a hello world",
+  "stream": false
+}'
+```
+
+**Server Management:**
 
 ```powershell
-# Server Management
+# Server commands
 ollama serve                          # Start server
 ollama list                           # List models
 ollama ps                             # Check running models
 nvidia-smi                            # Monitor GPU
-
-# Testing
-ollama run qwen-32b-cline "test"     # Test inference
-Invoke-RestMethod http://localhost:11434/api/tags  # Test API
 
 # Monitoring
 nvidia-smi -l 1                       # Real-time GPU stats
@@ -245,9 +276,11 @@ Get-Process ollama | Format-List *   # Process details
 **Technology Stack:**
 - **Inference Engine**: Ollama (open-source)
 - **AI Models**: Qwen 2.5 Coder, DeepSeek R1 (open-source)
-- **Client**: VS Code + Cline extension
+- **Interface**: HTTP REST API (universal access)
+- **CLI**: Cross-platform command-line tools
+- **Optional Client**: VS Code + Cline extension
 - **GPU**: NVIDIA with CUDA acceleration
-- **Platform**: Windows 11 Professional
+- **Platform**: Windows Server 2022, Ubuntu 22.04+, or Windows 11
 
 ## 🔐 Security Features
 
@@ -262,11 +295,14 @@ Get-Process ollama | Format-List *   # Process details
 
 ### Software Development
 
-- Code generation and completion
+- Code generation from any terminal
 - Refactoring and optimization
 - Bug fixing and debugging
 - Documentation generation
 - Code review assistance
+- Integration with any text editor or IDE
+- Shell script automation
+- CI/CD pipeline integration
 
 ### Enterprise Applications
 

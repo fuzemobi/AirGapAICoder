@@ -12,7 +12,9 @@
       "Bash(chmod +x scripts/installation/server/install-macos.sh)",
       "Bash(chmod +x scripts/cli/ollama-cli.sh)",
       "Bash(chmod +x scripts/services/monitor.sh)",
-      "Bash(./pull-all.sh --help)"
+      "Bash(./pull-all.sh --help)",
+      "Bash(git commit -m \"Release v1.0.0: Complete deployment automation with multi-platform support\n\nMajor Features:\n- Automated preparation scripts (pull-all.sh/ps1) for air-gap packaging\n- Server installation scripts for Windows, Ubuntu, and macOS\n- Service monitoring with auto-restart capability\n- Remote CLI wrapper for management (ollama-cli.sh)\n- Comprehensive documentation:\n  * SERVER-SETUP.md - Complete deployment guide\n  * CLIENT-USAGE.md - End-user guide\n  * Updated INSTALLATION.md references\n\nScripts Added:\n- scripts/preparation/pull-all.sh - Download and package components\n- scripts/installation/server/install-macos.sh - macOS server setup\n- scripts/services/monitor.sh - Health monitoring daemon\n- scripts/cli/ollama-cli.sh - Remote management CLI\n\nDocumentation:\n- Added VERSION file (1.0.0)\n- Added CHANGELOG.md with release notes\n- Fixed GitHub links (fuzemobi/AirGapAICoder)\n- Added version badge to README\n- Documented v1.1.0 roadmap (Podman containerization)\n\nPlatform Support:\n- Windows Server 2022 (primary)\n- Ubuntu Server 22.04+ (production)\n- macOS (development/testing)\n- Generic GPU requirements (removed hardware-specific references)\n\nNext Release (v1.1.0):\n- Podman-based containerization\n- AMD Ryzen 7 optimization\n- Web-based admin dashboard\n- Enhanced monitoring\n\nAuthor: Fuzemobi, LLC - Chad Rosenbohm\")",
+      "Bash(git push)"
     ],
     "deny": [],
     "ask": []
