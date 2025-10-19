@@ -5,6 +5,27 @@ All notable changes to AirGapAICoder will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-10-19
+
+### Changed
+- **Emphasized universal CLI access** - No IDE required
+- Repositioned CLI as primary interface (VS Code + Cline now optional)
+- Updated README to highlight terminal-first approach
+
+### Added
+- **Comprehensive CLI Usage Guide** (docs/CLI-USAGE.md)
+  - Usage from any terminal (bash, PowerShell, zsh, etc.)
+  - Direct HTTP API examples with curl, wget
+  - Integration examples: Python, Node.js, Vim, Emacs
+  - Git hooks, Makefile, CI/CD integration
+  - Batch operations and automation examples
+- Documentation emphasizes platform-agnostic access
+
+### Key Message
+**AirGapAICoder works from ANY terminal on ANY platform - no specific IDE required**
+
+---
+
 ## [1.0.0] - 2025-10-19
 
 ### Added

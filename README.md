@@ -4,7 +4,7 @@
 
 A complete solution for running powerful AI-assisted coding tools in secure, offline environments using open-source models and local GPU acceleration.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%2011-blue.svg)
 ![GPU](https://img.shields.io/badge/GPU-NVIDIA-green.svg)
