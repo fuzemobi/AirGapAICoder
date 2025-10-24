@@ -1,0 +1,185 @@
+# Docker Compose configuration for Air-Gap Deployment
+# Version: 1.2.0
+# Author: Fuzemobi, LLC - Chad Rosenbohm
+#
+# This configuration is optimized for air-gapped environments where:
+# - No internet connectivity is available
+# - Images are pre-loaded from tar files
+# - Models are pre-downloaded and mounted from host filesystem
+
+version: '3.8'
+
+services:
+  ollama:
+    # Use pre-built image (loaded from tar file)
+    image: airgap-ollama:latest
+    container_name: airgap-ollama-server
+
+    # GPU support (requires NVIDIA Container Toolkit)
+    # For Docker: use 'deploy' section
+    # For Podman: uncomment 'devices' section
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    # Uncomment for Podman:
+    # devices:
+    #   - nvidia.com/gpu=all
+
+    # Network configuration
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+
+    # Hostname for better container identification
+    hostname: airgap-ollama
+
+    # Volume mounts - USE HOST DIRECTORIES for air-gap
+    volumes:
+      # Pre-downloaded models from host filesystem
+      # Set HOST_MODELS_DIR to your local models directory
+      - ${HOST_MODELS_DIR:-./airgap-package/models}:/root/.ollama/models:rw
+
+      # Log storage on host filesystem
+      - ${HOST_LOGS_DIR:-./airgap-package/logs}:/var/log/ollama:rw
+
+      # Custom modelfiles (read-only)
+      - ${HOST_CONFIG_DIR:-./config/modelfiles}:/etc/ollama/modelfiles:ro
+
+    # Environment variables
+    environment:
+      # Ollama server configuration
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=*
+
+      # Performance tuning for air-gap (conservative settings)
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KEEP_ALIVE=24h
+
+      # Disable internet-dependent features
+      - OLLAMA_DISABLE_TELEMETRY=1
+
+      # Optional: Specific GPU selection
+      # - CUDA_VISIBLE_DEVICES=0
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Longer start period for model loading
+
+    # Resource limits (adjust based on your hardware)
+    # Uncomment and customize:
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '8'
+    #       memory: 32G
+    #     reservations:
+    #       cpus: '4'
+    #       memory: 16G
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Security options (optional, for hardened environments)
+    # security_opt:
+    #   - no-new-privileges:true
+    # read_only: false  # Must be false for Ollama to write temp files
+
+    # User namespace remapping (optional, for rootless mode)
+    # userns_mode: "host"
+
+# No named volumes - using direct host mounts for air-gap
+# volumes: {}
+
+# Optional: Custom network for isolation
+# networks:
+#   airgap-network:
+#     driver: bridge
+#     ipam:
+#       config:
+#         - subnet: 172.28.0.0/16
+
+# =============================================================================
+# Air-Gap Deployment Instructions
+# =============================================================================
+#
+# PREPARATION (On Internet-Connected System):
+# -------------------------------------------
+# 1. Build the image:
+#      docker-compose -f docker-compose.yml build
+#
+# 2. Export the image:
+#      docker save airgap-ollama:latest -o airgap-ollama-latest.tar
+#
+# 3. Download models (using Ollama):
+#      ollama pull qwen2.5-coder:32b-instruct-fp16
+#      ollama pull deepseek-r1:32b
+#      # Models stored in ~/.ollama/models
+#
+# 4. Package everything:
+#      mkdir -p airgap-package
+#      cp airgap-ollama-latest.tar airgap-package/
+#      cp -r ~/.ollama/models airgap-package/models/
+#      cp -r config airgap-package/config/
+#      cp docker-compose.air-gap.yml airgap-package/
+#      tar -czf airgap-package.tar.gz airgap-package/
+#
+# DEPLOYMENT (On Air-Gap System):
+# --------------------------------
+# 1. Transfer airgap-package.tar.gz via USB/removable media
+#
+# 2. Extract package:
+#      tar -xzf airgap-package.tar.gz
+#      cd airgap-package
+#
+# 3. Load the image:
+#      docker load -i airgap-ollama-latest.tar
+#
+# 4. Create .env file with paths:
+#      echo "HOST_MODELS_DIR=$(pwd)/models" > .env
+#      echo "HOST_LOGS_DIR=$(pwd)/logs" >> .env
+#      echo "HOST_CONFIG_DIR=$(pwd)/config/modelfiles" >> .env
+#
+# 5. Start the service:
+#      docker-compose -f docker-compose.air-gap.yml up -d
+#
+# 6. Verify deployment:
+#      docker-compose -f docker-compose.air-gap.yml ps
+#      docker-compose -f docker-compose.air-gap.yml logs -f
+#      curl http://localhost:11434/api/tags
+#
+# MANAGEMENT:
+# -----------
+# View logs:
+#   docker-compose -f docker-compose.air-gap.yml logs -f
+#
+# Stop service:
+#   docker-compose -f docker-compose.air-gap.yml down
+#
+# Restart service:
+#   docker-compose -f docker-compose.air-gap.yml restart
+#
+# Execute commands:
+#   docker-compose -f docker-compose.air-gap.yml exec ollama ollama list
+#   docker-compose -f docker-compose.air-gap.yml exec ollama airai --version
+#
+# Check health:
+#   docker-compose -f docker-compose.air-gap.yml exec ollama curl http://localhost:11434/api/tags
+#
+# =============================================================================

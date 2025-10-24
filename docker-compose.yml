@@ -1,0 +1,153 @@
+# Docker Compose configuration for AirGapAICoder
+# Version: 1.2.0
+# Author: Fuzemobi, LLC - Chad Rosenbohm
+
+version: '3.8'
+
+services:
+  ollama:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Containerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+
+    image: airgap-ollama:latest
+    container_name: airgap-ollama-server
+
+    # GPU support (requires NVIDIA Container Toolkit)
+    # For Docker: use 'deploy' section
+    # For Podman: uncomment 'devices' section
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    # Uncomment for Podman:
+    # devices:
+    #   - nvidia.com/gpu=all
+
+    # Network configuration
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+
+    # Hostname for better container identification
+    hostname: airgap-ollama
+
+    # Volume mounts for persistent data
+    volumes:
+      # Model storage (persistent)
+      - ollama-models:/root/.ollama/models
+
+      # Log storage (persistent)
+      - ollama-logs:/var/log/ollama
+
+      # Optional: Mount custom modelfiles
+      # - ./config/modelfiles:/etc/ollama/modelfiles:ro
+
+      # Optional: Mount local models for air-gap deployment
+      # - ${HOST_MODELS_DIR:-./models}:/root/.ollama/models
+
+    # Environment variables
+    environment:
+      # Ollama server configuration
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=${OLLAMA_ORIGINS:-*}
+
+      # Performance tuning
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-1}
+      - OLLAMA_MAX_LOADED_MODELS=${OLLAMA_MAX_LOADED_MODELS:-1}
+      - OLLAMA_FLASH_ATTENTION=${OLLAMA_FLASH_ATTENTION:-1}
+      - OLLAMA_KEEP_ALIVE=${OLLAMA_KEEP_ALIVE:-24h}
+
+      # Optional: Resource limits
+      # - OLLAMA_MAX_VRAM=${OLLAMA_MAX_VRAM:-}
+      # - OLLAMA_NUM_GPU=${OLLAMA_NUM_GPU:-1}
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resource limits (optional, adjust based on your hardware)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '8'
+    #       memory: 32G
+    #     reservations:
+    #       cpus: '4'
+    #       memory: 16G
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Network mode (optional)
+    # Use 'host' for better performance, but loses container isolation
+    # network_mode: host
+
+# Named volumes for data persistence
+volumes:
+  ollama-models:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOST_MODELS_DIR:-$HOME/.ollama/models}
+
+  ollama-logs:
+    driver: local
+
+# Optional: Custom network for multi-container setups
+# networks:
+#   airgap-network:
+#     driver: bridge
+
+# =============================================================================
+# Usage Instructions
+# =============================================================================
+#
+# Quick Start:
+#   docker-compose up -d
+#
+# View logs:
+#   docker-compose logs -f
+#
+# Stop services:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
+#
+# Rebuild image:
+#   docker-compose build
+#   docker-compose up -d
+#
+# Execute commands in container:
+#   docker-compose exec ollama ollama list
+#   docker-compose exec ollama airai --version
+#
+# Environment variable override:
+#   OLLAMA_PORT=8080 docker-compose up -d
+#
+# Custom configuration:
+#   Create .env file in project root with:
+#     OLLAMA_PORT=11434
+#     OLLAMA_NUM_PARALLEL=2
+#     HOST_MODELS_DIR=/path/to/models
+#
+# =============================================================================
