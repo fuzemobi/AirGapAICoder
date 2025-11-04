@@ -1,89 +1,41 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Hey, just some notes for working on this codebase.
+
+## How I organize things
+
+So I've got this two-level approach going on. There's my global `~/.claude/CLAUDE.md` that has the usual stuff - code quality, security basics (OWASP and whatnot), git workflows, testing standards, that kind of thing. It applies to everything I work on.
+
+Then for this specific project, check out `PROJECT_STANDARDS.md` - that's where the AirGapAICoder-specific stuff lives. Things like thinking through changes from different angles (architecture, development, security, QA), how to classify changes, and the air-gap deployment considerations.
+
+## Working on this project
+
+Before you start making changes, take a look at `PROJECT_STANDARDS.md` to understand the workflows. It covers how to handle different types of changes and what needs to be updated.
+
+When you're making changes, think about them from a few perspectives - architecture, development, security, and testing. Keep `docs/ARCHITECTURE.md` and `README.md` up to date if your changes affect them. Do a quick security review on code changes. And yeah, commit and push your tested changes.
+
+Check `PROJECT_STANDARDS.md` for the details on all this.
 
 ---
 
-## 📋 Standards Hierarchy
+## What this is
 
-This project follows a **two-tier standards system**:
+This is basically an AI coding assistant that runs completely offline - perfect for air-gapped/secure environments where you can't hit external APIs. Uses local LLM inference on a GPU-accelerated server that developers can access over the local network.
 
-### 1. Global Standards (Applies to ALL Your Projects)
-**Location:** `~/.claude/CLAUDE.md`
+## How it's set up
 
-Universal development standards that apply to every project:
-- Code quality and best practices
-- Security standards (OWASP Top 10, input validation)
-- Git workflow (mandatory commit-and-push)
-- Documentation requirements
-- Testing standards
-- Language-specific best practices
+The main components:
 
-**These are automatically loaded for every project you work on.**
+- Ollama Server running on Windows 11 with an NVIDIA GPU, listening on 0.0.0.0:11434 so the network can reach it. Manages the LLMs.
 
-### 2. Project-Specific Standards (AirGapAICoder)
-**Location:** `PROJECT_STANDARDS.md` (this repository)
+- AI Models I'm using:
+  - Qwen 2.5 Coder 32B (19GB) - main workhorse, 131k context
+  - DeepSeek R1 32B (19GB) - for more complex reasoning
+  - Qwen 2.5 Coder 14B (9GB) - lighter backup option
 
-AirGapAICoder-specific requirements that **extend and override** global standards:
-- Multi-persona approach (Architect, Developer, Security, QA)
-- Change classification system (Significant vs. Trivial)
-- Air-gap deployment considerations
-- Project-specific workflows and checklists
+- Client side is Cline (VS Code extension) that talks to Ollama over HTTP. Multiple users can connect at once.
 
----
-
-## ⚠️ MANDATORY: Project Standards
-
-**YOU MUST read and strictly follow ALL standards defined in `PROJECT_STANDARDS.md` before starting any work.**
-
-**At the beginning of EVERY session:**
-1. ✅ Apply **global standards** from `~/.claude/CLAUDE.md` (automatic)
-2. ✅ Read `PROJECT_STANDARDS.md` in its entirety
-3. ✅ Understand the mandatory workflows for Significant vs. Trivial changes
-4. ✅ Apply all Universal Rules to EVERY change
-5. ✅ Update `docs/ARCHITECTURE.md` and `README.md` as required
-6. ✅ Complete security reviews for all code changes
-7. ✅ **Commit and push** all tested changes (global standard)
-
-**You are required to act as ALL of the following simultaneously:**
-- Software Architect
-- Lead Developer
-- Security Architect
-- QA Engineer
-
-**See `PROJECT_STANDARDS.md` for complete requirements.**
-
----
-
-## Project Purpose
-
-AirGapAICoder is an enterprise air-gapped AI coding assistant system that runs completely offline using local LLM inference. The system provides AI-assisted development capabilities in secure, network-isolated environments.
-
-**Target Deployment**: GPU-accelerated server, accessible via local network to multiple developer workstations.
-
-## System Architecture
-
-### Core Components Stack
-
-1. **Ollama Server** (GPU-accelerated inference engine)
-   - Runs on Windows 11 host with NVIDIA GPU
-   - Configured for network accessibility (0.0.0.0:11434)
-   - Manages multiple large language models
-
-2. **Primary AI Models**
-   - **Qwen 2.5 Coder 32B** (19GB) - Main coding assistant with 131k context
-   - **DeepSeek R1 32B** (19GB) - Advanced reasoning and problem-solving
-   - **Qwen 2.5 Coder 14B** (9GB) - Backup/lightweight option
-
-3. **Client Interface**
-   - **Cline** - VS Code extension for AI-assisted development
-   - Connects to Ollama server via HTTP API
-   - Supports multiple concurrent users on network
-
-4. **Supporting Infrastructure**
-   - CUDA toolkit for GPU acceleration
-   - PowerShell scripts for deployment and management
-   - Monitoring and logging systems
+- Also need CUDA toolkit for GPU stuff, plus some PowerShell scripts to deploy and manage everything, basic monitoring.
 
 ### Network Architecture
 
@@ -108,25 +60,23 @@ AirGapAICoder is an enterprise air-gapped AI coding assistant system that runs c
     └─────────┘       └─────────┘
 ```
 
-## Hardware Requirements
+## Hardware you'll need
 
-### Server (GPU-Accelerated)
-- **GPU**: NVIDIA with 24GB+ VRAM (32GB+ recommended for 32B models)
-- **RAM**: 32GB+ system RAM
-- **Storage**: 100GB+ free space for models and cache
-- **OS**: Windows 11 Professional
-- **Network**: Gigabit Ethernet for local network access
+Server side:
+- NVIDIA GPU with at least 24GB VRAM (32GB+ is better for the 32B models)
+- 32GB+ system RAM
+- 100GB+ free disk space for models and cache
+- Windows 11 Pro
+- Gigabit ethernet
 
-### Client Workstations
-- **RAM**: 8GB+ (VS Code + extensions)
-- **Storage**: 1GB+ for VS Code and Cline extension
-- **Network**: Gigabit Ethernet connection to server
+Client machines:
+- 8GB+ RAM (for VS Code)
+- 1GB+ storage (VS Code + Cline)
+- Gigabit network connection to server
 
-## Key Configuration Parameters
+## Important config stuff
 
-### Ollama Model Configuration
-
-All models use extended context windows via custom Modelfiles:
+For Ollama models, I'm using custom Modelfiles with extended context:
 
 ```
 PARAMETER num_ctx 131072        # 131k token context window
@@ -134,17 +84,13 @@ PARAMETER temperature 0.2       # Low temperature for code generation
 PARAMETER num_gpu 1             # Force GPU usage
 ```
 
-### Environment Variables (Windows)
+Ollama environment variables (Windows):
+- `OLLAMA_HOST=0.0.0.0:11434` - lets network reach it
+- `OLLAMA_NUM_PARALLEL=1` - run one model at a time for best performance
+- `OLLAMA_MAX_LOADED_MODELS=1` - keeps VRAM usage optimized
+- `OLLAMA_FLASH_ATTENTION=1` - speed boost
 
-Critical Ollama configuration:
-- `OLLAMA_HOST=0.0.0.0:11434` - Enable network access
-- `OLLAMA_NUM_PARALLEL=1` - Single model at a time for max performance
-- `OLLAMA_MAX_LOADED_MODELS=1` - Optimize VRAM usage
-- `OLLAMA_FLASH_ATTENTION=1` - Enable flash attention for speed
-
-### Cline Configuration
-
-Client configuration for network access:
+Cline needs to be pointed at the server:
 ```json
 {
   "apiModelOverride": {
@@ -161,9 +107,9 @@ Client configuration for network access:
 }
 ```
 
-## Development Commands
+## Useful commands
 
-### Server Management (Windows PowerShell - Run as Administrator)
+Server stuff (PowerShell as admin):
 
 ```powershell
 # Start Ollama server
@@ -191,7 +137,7 @@ Get-Process -Name "ollama"
 Invoke-RestMethod -Uri "http://localhost:11434/api/tags"
 ```
 
-### Model Management
+Model stuff:
 
 ```powershell
 # Pull new models (requires internet - staging environment only)
@@ -207,7 +153,7 @@ ollama rm model-name
 ollama show qwen-32b-cline
 ```
 
-### Firewall Configuration
+Firewall:
 
 ```powershell
 # Enable Ollama network access
@@ -217,7 +163,7 @@ New-NetFirewallRule -DisplayName "Ollama" -Direction Inbound -Port 11434 -Protoc
 Get-NetFirewallRule -DisplayName "Ollama"
 ```
 
-### Performance Monitoring
+Monitoring performance:
 
 ```powershell
 # GPU utilization
@@ -231,49 +177,49 @@ $process = Get-Process -Name "ollama"
 $process.PriorityClass = "High"
 ```
 
-## Air-Gap Deployment Process
+## Getting this into an air-gapped environment
 
-### Phase 1: Preparation (Internet-Connected Staging System)
+Step 1 - Prep on a machine with internet:
 
-1. **Download software packages**:
-   - Ollama for Windows installer
-   - VS Code installer (System mode)
-   - Cline extension (.vsix file)
-   - NVIDIA CUDA Toolkit
-   - Git for Windows (optional)
+Download everything you need:
+- Ollama installer for Windows
+- VS Code installer (System mode)
+- Cline extension (.vsix file)
+- NVIDIA CUDA Toolkit
+- Git for Windows if you want it
 
-2. **Download and configure models**:
-   ```powershell
-   ollama pull qwen2.5-coder:32b-instruct-fp16
-   ollama pull deepseek-r1:32b
-   ollama pull qwen2.5-coder:14b
+Pull and configure the models:
+```powershell
+ollama pull qwen2.5-coder:32b-instruct-fp16
+ollama pull deepseek-r1:32b
+ollama pull qwen2.5-coder:14b
 
-   # Create custom models with extended context
-   ollama create qwen-32b-cline -f Modelfile-qwen32b
-   ollama create deepseek-r1-32b-cline -f Modelfile-deepseek32b
-   ```
+# Create custom models with extended context
+ollama create qwen-32b-cline -f Modelfile-qwen32b
+ollama create deepseek-r1-32b-cline -f Modelfile-deepseek32b
+```
 
-3. **Package for transfer**:
-   ```powershell
-   # Models stored in: %USERPROFILE%\.ollama\models
-   # Copy entire .ollama directory
-   # Total size: ~47GB for all models
-   ```
+Package it all up:
+```powershell
+# Models are in: %USERPROFILE%\.ollama\models
+# Copy the whole .ollama directory
+# You're looking at ~47GB total for all models
+```
 
-### Phase 2: Air-Gap Installation (Target Server)
+Step 2 - Install on the air-gapped server:
 
-1. **Transfer files** via USB/removable media
-2. **Run installation script** (scripts/install-airgap.ps1)
-3. **Configure network access** (firewall, environment variables)
-4. **Verify GPU acceleration** (nvidia-smi)
-5. **Test model inference** (ollama run)
+1. Transfer everything via USB
+2. Run scripts/install-airgap.ps1
+3. Set up firewall and environment variables
+4. Check GPU with nvidia-smi
+5. Test with ollama run
 
-### Phase 3: Client Setup
+Step 3 - Set up clients:
 
-1. **Install VS Code** on client workstations
-2. **Install Cline extension** from .vsix file
-3. **Configure Cline** to point to server IP
-4. **Test connection** and inference
+1. Install VS Code on workstations
+2. Install Cline from the .vsix file
+3. Point Cline to the server IP
+4. Test it out
 
 ## Project Structure
 
@@ -299,29 +245,29 @@ AirGapAICoder/
 └── tests/                    # Testing utilities
 ```
 
-## Security Considerations
+## Security stuff to think about
 
-1. **Network Isolation**: Server should be on isolated VLAN with no internet access
-2. **Access Control**: Use Windows authentication for Ollama access
-3. **Firewall Rules**: Only allow port 11434 from trusted client IPs
-4. **Model Integrity**: Verify checksums of downloaded models
-5. **Logging**: Enable comprehensive logging for audit trails
+- Keep the server on an isolated VLAN with no internet
+- Use Windows auth for Ollama access
+- Lock down firewall - only allow port 11434 from known client IPs
+- Verify checksums on downloaded models before deploying
+- Turn on logging for audit trails
 
-## Performance Optimization
+## Making it faster
 
-### GPU Optimization
-- Use fp16 models for better VRAM efficiency
-- Enable flash attention for faster inference
-- Monitor GPU temperature and throttling
-- Ensure latest NVIDIA drivers installed
+GPU tips:
+- Use fp16 models - way better VRAM efficiency
+- Enable flash attention for speed
+- Watch GPU temps and throttling
+- Keep NVIDIA drivers updated
 
-### System Optimization
-- Set Windows power plan to "High Performance"
-- Disable unnecessary Windows services
-- Set Ollama process priority to High
-- Use SSD for model storage
+System tweaks:
+- Windows power plan to "High Performance"
+- Kill unnecessary Windows services
+- Bump Ollama process priority to High
+- Put models on an SSD
 
-### Model Selection by VRAM
+Picking models based on your VRAM:
 
 | VRAM | Recommended Model | Context | Performance |
 |------|------------------|---------|-------------|
@@ -329,11 +275,9 @@ AirGapAICoder/
 | 32GB | Qwen 2.5 Coder 32B + DeepSeek R1 | 131k | Optimal |
 | 48GB+ | Qwen 2.5 Coder 72B | 131k+ | Maximum |
 
-## Troubleshooting
+## When things go wrong
 
-### Common Issues
-
-**Ollama not using GPU**:
+Ollama not using GPU:
 ```powershell
 # Verify CUDA installation
 nvidia-smi
@@ -341,7 +285,7 @@ nvidia-smi
 nvidia-smi pmon
 ```
 
-**Network connection refused**:
+Network connection refused:
 ```powershell
 # Check Ollama is listening on network
 netstat -an | Select-String "11434"
@@ -349,7 +293,7 @@ netstat -an | Select-String "11434"
 Get-NetFirewallRule -DisplayName "Ollama"
 ```
 
-**Slow inference**:
+Slow inference:
 ```powershell
 # Check GPU utilization
 nvidia-smi
@@ -359,7 +303,7 @@ ollama ps
 Get-Process ollama | Format-List *
 ```
 
-## Testing
+## Testing it
 
 ```powershell
 # Test server health
@@ -371,27 +315,27 @@ ollama run qwen-32b-cline "def fibonacci(n):"
 # Test network access from client
 Invoke-RestMethod -Uri "http://SERVER_IP:11434/api/tags"
 
-# Performance benchmark
+# Quick performance check
 Measure-Command { ollama run qwen-32b-cline "Write a sorting algorithm" }
 ```
 
-## Maintenance
+## Keeping it running
 
-### Regular Tasks
-- Monitor disk space (model cache can grow)
-- Review logs for errors or performance issues
-- Update NVIDIA drivers during maintenance windows
-- Verify model integrity periodically
+Regular stuff to check:
+- Disk space (model cache grows over time)
+- Logs for errors or weirdness
+- NVIDIA driver updates when you can
+- Model integrity checks now and then
 
-### Log Locations
-- Ollama logs: `%LOCALAPPDATA%\Ollama\logs`
-- Windows Event Viewer: Application logs
-- Custom monitoring logs: `logs/` directory
+Where to find logs:
+- Ollama: `%LOCALAPPDATA%\Ollama\logs`
+- Windows Event Viewer
+- Custom logs in `logs/` directory
 
-## Future Enhancements
+## Ideas for later
 
-- Web-based management interface
-- Automated model switching based on task
-- Multi-GPU support for parallel inference
-- Metrics dashboard for usage analytics
-- Automated backup and restore procedures
+- Web-based admin interface
+- Smart model switching based on what you're doing
+- Multi-GPU support for running models in parallel
+- Usage metrics dashboard
+- Automated backups
